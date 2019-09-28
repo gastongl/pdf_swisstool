@@ -1,3 +1,5 @@
+# main.py
+
 #import wx
 import interface
 
