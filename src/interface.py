@@ -8,12 +8,10 @@ import merge
 class AppFrame(wx.Frame): # AppFrame object inherits from wx.Frame
     #def __init__(self, *args, **kwargs):
     def __init__(self): ##Constructor
-        super(AppFrame, self).__init__(None, title="PDF Swiss Tool") # Initializes parent constructor, set window title
+        super(AppFrame, self).__init__(None, title="PDF SwissTool") # Initializes parent constructor, set window title
         self.SetSize((960, 540)) # Set window size
         self.Centre() # Centers on screen
         self.panel = AppPanel(self) # Create an AppPanel object
-    
-    
 
 class AppPanel(wx.Panel): # AppPanel inherits from wx.Panel
     def __init__(self, parent): ##Constructor, inherits parent
@@ -42,6 +40,9 @@ class AppPanel(wx.Panel): # AppPanel inherits from wx.Panel
         addpdf_btn = wx.Button(self, label="Add...")
         addpdf_btn.Bind(wx.EVT_BUTTON, self.on_add_files)
         
+        rempdf_btn = wx.Button(self, label="Remove")
+        rempdf_btn.Bind(wx.EVT_BUTTON, self.on_rem_file)
+        
         clearlist_btn = wx.Button(self, label="Clear list")
         clearlist_btn.Bind(wx.EVT_BUTTON, self.on_clear_list)
         
@@ -66,6 +67,7 @@ class AppPanel(wx.Panel): # AppPanel inherits from wx.Panel
         right_sizer.Add(addpdf_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(moveitemup_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(moveitemdown_btn, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(rempdf_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(clearlist_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(merge_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(self.finalsize_lbl, 0, wx.ALL | wx.CENTER, 5)
@@ -77,6 +79,12 @@ class AppPanel(wx.Panel): # AppPanel inherits from wx.Panel
         dlg = wx.FileDialog(self, title, wildcard="PDF files (*.pdf)|*.pdf", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE) # determine open dialog rules
         if dlg.ShowModal() == wx.ID_OK: self.add_file_listing(dlg.GetPaths()) # Get files open
         dlg.Destroy() # Destroy dialog window
+    
+    def on_rem_file(self, event):
+        if (self.list_ctrl.GetFocusedItem()) == -1: print ("There is no objects selected to remove") #If there is not items selected, don't remove
+        else:
+            del self.items_list[self.list_ctrl.GetFocusedItem()] #Delete the item from items_list
+            self.update_file_listing() #Call update file listing, and pass new position of the item for tracking (keep it selected)
     
     def on_move_item_up(self, event): # Handles move up event
         if (self.list_ctrl.GetFocusedItem()) == -1: print ("There is no objects selected to move") #If there is not items selected, don't move
@@ -119,7 +127,7 @@ class AppPanel(wx.Panel): # AppPanel inherits from wx.Panel
                 self.mergeobj.pdf_merge_list.append(x[3])
             self.mergeobj.merge_pdf() # Call merge_pdf function and merge pdfs
     
-    def update_file_listing(self, selection): # Update list control after moving up or down items
+    def update_file_listing(self, selection=-1): # Update list control after moving up or down items
         self.list_ctrl.DeleteAllItems() # Deletes all items from the list
         index_temp = 0 # Creates a temporal index for tracking items
         self.finalsize = 0 # Set finalsize of the merged (final) pdf to zero, as it is going to be calculated again.
@@ -135,30 +143,35 @@ class AppPanel(wx.Panel): # AppPanel inherits from wx.Panel
         
         #The following instructions make it so the item moved can be moved again without having to select it again
         #(!WARNING!: Make sure that when remove individual items this doesn't break
-        self.list_ctrl.Select(selection)
-        self.list_ctrl.Focus(selection)
+        if selection != -1:
+            self.list_ctrl.Select(selection)
+            self.list_ctrl.Focus(selection)
     
     def add_file_listing(self, files_path): # Add files to the list
         for pdf_path in files_path: #Checks all the files that the user opened
-            pdf = PyPDF4.PdfFileReader(pdf_path) #Read the pdf file from path and puts into var
-            
-            self.finalsize += os.path.getsize(pdf_path) # Adds the size to var that contains merged (total) pdf size
-            pdf_size = self.calculate_pdf_size(os.path.getsize(pdf_path)) # Calculates size of the pdf to store info in items_list
-            
-            # Insert pdf data as strings into items_list:
-            self.items_list.append((str((pdf.getDocumentInfo()).title), # Insert title data
-                                   str((pdf.getDocumentInfo()).author), # Insert author data
-                                   str(pdf_size), # Insert size data
-                                   str(pdf_path))) # Insert path of the file
-            
-            # The next instructions refresh the with the data of the pdf:
-            self.list_ctrl.InsertItem(self.index, str((pdf.getDocumentInfo()).title))
-            self.list_ctrl.SetItem(self.index, 1, str((pdf.getDocumentInfo()).author))
-            self.list_ctrl.SetItem(self.index, 2, str(pdf_size))
-            self.list_ctrl.SetItem(self.index, 3, str(pdf_path))
-            
-            self.finalsize_lbl.SetLabel(f"Final PDF size: {self.calculate_pdf_size(self.finalsize)}") # Update label with final size of the pdf
-            self.index += 1
+            if self.index >= 10: # When index reaches 10 stop loop, don't add more files
+                print ("Can't add more than 10 files")
+                break
+            else:
+                pdf = PyPDF4.PdfFileReader(pdf_path) #Read the pdf file from path and puts into var
+                
+                self.finalsize += os.path.getsize(pdf_path) # Adds the size to var that contains merged (total) pdf size
+                pdf_size = self.calculate_pdf_size(os.path.getsize(pdf_path)) # Calculates size of the pdf to store info in items_list
+                
+                # Insert pdf data as strings into items_list:
+                self.items_list.append((str((pdf.getDocumentInfo()).title), # Insert title data
+                                    str((pdf.getDocumentInfo()).author), # Insert author data
+                                    str(pdf_size), # Insert size data
+                                    str(pdf_path))) # Insert path of the file
+                
+                # The next instructions refresh the with the data of the pdf:
+                self.list_ctrl.InsertItem(self.index, str((pdf.getDocumentInfo()).title))
+                self.list_ctrl.SetItem(self.index, 1, str((pdf.getDocumentInfo()).author))
+                self.list_ctrl.SetItem(self.index, 2, str(pdf_size))
+                self.list_ctrl.SetItem(self.index, 3, str(pdf_path))
+                
+                self.finalsize_lbl.SetLabel(f"Final PDF size: {self.calculate_pdf_size(self.finalsize)}") # Update label with final size of the pdf
+                self.index += 1
     
     def calculate_pdf_size(self, xsz): # Function that takes an integer and returns a string with size
         if (xsz) > (1048576): # If file is bigger than 1 MB, format str with size for MB
