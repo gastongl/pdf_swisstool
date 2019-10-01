@@ -14,10 +14,12 @@ class MergeObject:
             for page in range(pdf_reader.getNumPages()):
                 # Add each page to the writer object
                 pdf_writer.addPage(pdf_reader.getPage(page))
-    
+        
+        return pdf_writer
+        
         # Write out the merged PDF
-        with open("C:\\pdftest\\test.pdf", 'wb') as out:
-            pdf_writer.write(out)
+        #with open("C:\\pdftest\\test.pdf", 'wb') as out:
+        #    pdf_writer.write(out)
     
     
     def clearlist():
