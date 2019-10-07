@@ -1,1 +1,6 @@
 src/__pycache__
+src/build
+src/dist
+src/main.spec
+src/pdfst.ico
+src/pdfst.spec

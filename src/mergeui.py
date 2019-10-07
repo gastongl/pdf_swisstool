@@ -29,23 +29,23 @@ class MergePanel(wx.Panel):
         
         
         ### Buttons ###
-        addpdf_btn = wx.Button(self, label="Add...")
-        addpdf_btn.Bind(wx.EVT_BUTTON, self.on_add_files)
+        self.addpdf_btn = wx.Button(self, label="Add...")
+        self.addpdf_btn.Bind(wx.EVT_BUTTON, self.on_add_files)
         
-        moveitemup_btn = wx.Button(self, label="↑")
-        moveitemup_btn.Bind(wx.EVT_BUTTON, self.on_move_item_up)
+        self.moveitemup_btn = wx.Button(self, label="↑")
+        self.moveitemup_btn.Bind(wx.EVT_BUTTON, self.on_move_item_up)
         
-        moveitemdown_btn = wx.Button(self, label="↓")
-        moveitemdown_btn.Bind(wx.EVT_BUTTON, self.on_move_item_down)
+        self.moveitemdown_btn = wx.Button(self, label="↓")
+        self.moveitemdown_btn.Bind(wx.EVT_BUTTON, self.on_move_item_down)
         
-        rempdf_btn = wx.Button(self, label="Remove")
-        rempdf_btn.Bind(wx.EVT_BUTTON, self.on_rem_file)
+        self.rempdf_btn = wx.Button(self, label="Remove")
+        self.rempdf_btn.Bind(wx.EVT_BUTTON, self.on_rem_file)
         
-        clearlist_btn = wx.Button(self, label="Clear list")
-        clearlist_btn.Bind(wx.EVT_BUTTON, self.on_clear_list)
+        self.clearlist_btn = wx.Button(self, label="Clear list")
+        self.clearlist_btn.Bind(wx.EVT_BUTTON, self.on_clear_list)
         
-        merge_btn = wx.Button(self, label="Merge PDF")
-        merge_btn.Bind(wx.EVT_BUTTON, self.on_merge)
+        self.merge_btn = wx.Button(self, label="Merge PDF")
+        self.merge_btn.Bind(wx.EVT_BUTTON, self.on_merge)
         
         
         ### Labels ###
@@ -57,14 +57,16 @@ class MergePanel(wx.Panel):
         main_sizer.Add(self.list_ctrl, 0, wx.ALL | wx.LEFT, 5)
         main_sizer.Add(right_sizer, 0, wx.ALL | wx.RIGHT, 5)
         
-        right_sizer.Add(addpdf_btn, 0, wx.ALL | wx.CENTER, 5)
-        right_sizer.Add(moveitemup_btn, 0, wx.ALL | wx.CENTER, 5)
-        right_sizer.Add(moveitemdown_btn, 0, wx.ALL | wx.CENTER, 5)
-        right_sizer.Add(rempdf_btn, 0, wx.ALL | wx.CENTER, 5)
-        right_sizer.Add(clearlist_btn, 0, wx.ALL | wx.CENTER, 5)
-        right_sizer.Add(merge_btn, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(self.addpdf_btn, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(self.moveitemup_btn, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(self.moveitemdown_btn, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(self.rempdf_btn, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(self.clearlist_btn, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(self.merge_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(self.finalsize_lbl, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(self.totalpages_lbl, 0, wx.ALL | wx.CENTER, 5)
+        
+        self.update_buttons()
         
         self.SetSizer(main_sizer)
     
@@ -81,6 +83,7 @@ class MergePanel(wx.Panel):
                 self.add_file_listing(pathname)
             except IOError:
                 wx.LogError("An error has ocurred while trying to open the files.")
+        self.update_buttons()
     
     def on_rem_file(self, event): # Handles remove event
         if (self.list_ctrl.GetFocusedItem()) == -1: print ("There is no objects selected to remove") #If there is not items selected, don't remove
@@ -121,6 +124,7 @@ class MergePanel(wx.Panel):
             self.finalsize_lbl.SetLabel(f"Final PDF size: {self.calculate_pdf_size(self.finalsize)}")
             self.totalpages_lbl.SetLabel(f"0 pages")
             self.totalpages = 0
+            self.update_buttons()
         else: print("There is no files in list, not clearing list")
     
     def on_merge(self, event): # Handles merge event
@@ -160,6 +164,8 @@ class MergePanel(wx.Panel):
         self.index = index_temp # Finally set the global index tracker to the same value as the temporal one
         self.totalpages_lbl.SetLabel(f"{self.totalpages} pages")
         self.finalsize_lbl.SetLabel(f"Final PDF size: {self.calculate_pdf_size(self.finalsize)}") # Updates final pdf size
+        
+        self.update_buttons()
         
         #The following instructions make it so the item moved can be moved again without having to select it again
         #(!WARNING!: Make sure that when remove individual items this doesn't break
@@ -208,3 +214,20 @@ class MergePanel(wx.Panel):
             xsz = xsz / (1024)
             pdf_size = f"{int(xsz)} KB"
         return pdf_size
+    
+    def update_buttons(self): # Update buttons state taking into consideration amount of items on list
+        if self.items_list: # If there is any object on list, enable the following buttons:
+            self.rempdf_btn.Enable()
+            self.clearlist_btn.Enable()
+            self.merge_btn.Enable()
+        else: # Else disable them:
+            self.rempdf_btn.Disable()
+            self.clearlist_btn.Disable()
+            self.merge_btn.Disable()
+            
+        if self.index > 1: # Enable the following buttons if there is more than one item on the list:
+            self.moveitemup_btn.Enable()
+            self.moveitemdown_btn.Enable()
+        else: # If not, disable them:
+            self.moveitemup_btn.Disable()
+            self.moveitemdown_btn.Disable()
