@@ -2,6 +2,7 @@
 
 import wx
 import mergeui
+import aboutui
 
 class AppFrame(wx.Frame): # AppFrame object inherits from wx.Frame
     #def __init__(self, *args, **kwargs):
@@ -20,14 +21,14 @@ class AppPanel(wx.Panel): # AppPanel inherits from wx.Panel
         nb = wx.Notebook(self)
 
         # Create the tab windows
-        tab1 = mergeui.MergePanel(nb)
-        #tab2 = TabTwo(nb)
+        tab1 = aboutui.AboutPanel(nb)
+        tab2 = mergeui.MergePanel(nb)
         #tab3 = TabThree(nb)
         #tab4 = TabFour(nb)
 
         # Add the windows to tabs and name them.
-        nb.AddPage(tab1, "Merger")
-        #nb.AddPage(tab2, "Tab 2")
+        nb.AddPage(tab1, "About")
+        nb.AddPage(tab2, "Merger")
         #nb.AddPage(tab3, "Tab 3")
         #nb.AddPage(tab4, "Tab 4")
 

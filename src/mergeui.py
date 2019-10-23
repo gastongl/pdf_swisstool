@@ -19,13 +19,13 @@ class MergePanel(wx.Panel):
         
         ### List control ###
         #self.list_ctrl = wx.ListCtrl = wx.ListCtrl(self, size=(750, 300), style=wx.LC_REPORT | wx.BORDER_SUNKEN)
-        self.list_ctrl = wx.ListCtrl(self, size=(750, 300), style=wx.LC_REPORT | wx.BORDER_SUNKEN | wx.LC_SINGLE_SEL)
+        self.list_ctrl = wx.ListCtrl(self, size=(800, 300), style=wx.LC_REPORT | wx.BORDER_SUNKEN | wx.LC_SINGLE_SEL)
         
         self.list_ctrl.InsertColumn(0, "Title", width=220)
-        self.list_ctrl.InsertColumn(1, "Author", width=180)
+        self.list_ctrl.InsertColumn(1, "Author", width=220)
         self.list_ctrl.InsertColumn(2, "Size", width=70)
         self.list_ctrl.InsertColumn(3, "Pages", width=50)
-        self.list_ctrl.InsertColumn(4, "Path", width=200)
+        self.list_ctrl.InsertColumn(4, "Path", width=220)
         
         
         ### Buttons ###
@@ -49,7 +49,7 @@ class MergePanel(wx.Panel):
         
         
         ### Labels ###
-        self.finalsize_lbl = wx.StaticText(self, label="Final PDF size: 0 KB")
+        self.finalsize_lbl = wx.StaticText(self, label="Final PDF size:\n0 KB")
         self.totalpages_lbl = wx.StaticText(self, label="0 pages")
         
         
@@ -63,8 +63,8 @@ class MergePanel(wx.Panel):
         right_sizer.Add(self.rempdf_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(self.clearlist_btn, 0, wx.ALL | wx.CENTER, 5)
         right_sizer.Add(self.merge_btn, 0, wx.ALL | wx.CENTER, 5)
-        right_sizer.Add(self.finalsize_lbl, 0, wx.ALL | wx.CENTER, 5)
-        right_sizer.Add(self.totalpages_lbl, 0, wx.ALL | wx.CENTER, 5)
+        right_sizer.Add(self.finalsize_lbl, 0, wx.ALL | wx.LEFT, 0)
+        right_sizer.Add(self.totalpages_lbl, 0, wx.ALL | wx.LEFT, 0)
         
         self.update_buttons()
         
@@ -121,7 +121,7 @@ class MergePanel(wx.Panel):
             self.index = 0
             self.mergeobj.clearlist()
             self.finalsize = 0
-            self.finalsize_lbl.SetLabel(f"Final PDF size: {self.calculate_pdf_size(self.finalsize)}")
+            self.finalsize_lbl.SetLabel(f"Final PDF size:\n{self.calculate_pdf_size(self.finalsize)}")
             self.totalpages_lbl.SetLabel(f"0 pages")
             self.totalpages = 0
             self.update_buttons()
@@ -163,7 +163,7 @@ class MergePanel(wx.Panel):
             index_temp += 1
         self.index = index_temp # Finally set the global index tracker to the same value as the temporal one
         self.totalpages_lbl.SetLabel(f"{self.totalpages} pages")
-        self.finalsize_lbl.SetLabel(f"Final PDF size: {self.calculate_pdf_size(self.finalsize)}") # Updates final pdf size
+        self.finalsize_lbl.SetLabel(f"Final PDF size:\n{self.calculate_pdf_size(self.finalsize)}") # Updates final pdf size
         
         self.update_buttons()
         
@@ -199,7 +199,7 @@ class MergePanel(wx.Panel):
                 self.list_ctrl.SetItem(self.index, 3, str(pdf_pages))
                 self.list_ctrl.SetItem(self.index, 4, str(pdf_path))
                 
-                self.finalsize_lbl.SetLabel(f"Final PDF size: {self.calculate_pdf_size(self.finalsize)}") # Update label with final size of the pdf
+                self.finalsize_lbl.SetLabel(f"Final PDF size:\n{self.calculate_pdf_size(self.finalsize)}") # Update label with final size of the pdf
                 
                 self.totalpages += pdf_pages # Adds the value of pdf_pages to totalpages var
                 self.totalpages_lbl.SetLabel(f"{self.totalpages} pages") # Update label with total pages
@@ -219,15 +219,14 @@ class MergePanel(wx.Panel):
         if self.items_list: # If there is any object on list, enable the following buttons:
             self.rempdf_btn.Enable()
             self.clearlist_btn.Enable()
-            self.merge_btn.Enable()
         else: # Else disable them:
             self.rempdf_btn.Disable()
             self.clearlist_btn.Disable()
-            self.merge_btn.Disable()
-            
         if self.index > 1: # Enable the following buttons if there is more than one item on the list:
             self.moveitemup_btn.Enable()
             self.moveitemdown_btn.Enable()
+            self.merge_btn.Enable()
         else: # If not, disable them:
             self.moveitemup_btn.Disable()
             self.moveitemdown_btn.Disable()
+            self.merge_btn.Disable()
